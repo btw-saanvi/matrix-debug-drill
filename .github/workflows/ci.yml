@@ -10,9 +10,19 @@ jobs:
   test:
     runs-on: ${{ matrix.os }}
     strategy:
+      # fail-fast: false is correct for a compatibility matrix: every OS × Node
+      # combination must run to completion so we can see the full grid, not stop
+      # after the first red cell. Isolated environment bugs would otherwise hide
+      # remaining failures and slow down targeted fixes.
+      fail-fast: false
       matrix:
         os: [ubuntu-latest, windows-latest]
         node: [18, 20, 22]
+        include:
+          - os: ubuntu-latest
+            node: 24
+            experimental: true
+    continue-on-error: ${{ matrix.experimental == true }}
     steps:
       - uses: actions/checkout@v4
       - name: Print environment info for debugging
